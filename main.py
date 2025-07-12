@@ -287,7 +287,7 @@ def main():
         # Load components
         sim.load_ml_model('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/loan_model.pkl')
         sim.load_personas('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/config/personas.json')
-        test_data = sim.load_test_data('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/test_data.csv')
+        test_data = sim.load_test_data('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/experiment_cases_fixed.csv')
         
         # Run simulation
         results = sim.run_simulation(

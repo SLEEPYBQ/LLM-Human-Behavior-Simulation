@@ -1,16 +1,17 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import joblib
 import os
 
 class LoanApprovalModel:
     def __init__(self):
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+        self.model = LogisticRegression(random_state=42, max_iter=1000)
         self.label_encoders = {}
+        self.scaler = StandardScaler()
         self.is_trained = False
         
     def load_and_preprocess_data(self, csv_path):
@@ -53,7 +54,9 @@ class LoanApprovalModel:
     
     def train(self, X_train, y_train):
         """Train the model"""
-        self.model.fit(X_train, y_train)
+        # Scale numerical features
+        X_train_scaled = self.scaler.fit_transform(X_train)
+        self.model.fit(X_train_scaled, y_train)
         self.is_trained = True
         print("Model trained successfully!")
         
@@ -62,7 +65,8 @@ class LoanApprovalModel:
         if not self.is_trained:
             raise ValueError("Model must be trained first")
             
-        predictions = self.model.predict(X_test)
+        X_test_scaled = self.scaler.transform(X_test)
+        predictions = self.model.predict(X_test_scaled)
         accuracy = accuracy_score(y_test, predictions)
         
         print(f"Model Accuracy: {accuracy:.4f}")
@@ -109,9 +113,12 @@ class LoanApprovalModel:
         # Reorder columns to match training data
         loan_data_encoded = loan_data_encoded[expected_columns]
         
+        # Scale the data
+        loan_data_scaled = self.scaler.transform(loan_data_encoded)
+        
         # Make prediction
-        prediction = self.model.predict(loan_data_encoded)[0]
-        probability = self.model.predict_proba(loan_data_encoded)[0]
+        prediction = self.model.predict(loan_data_scaled)[0]
+        probability = self.model.predict_proba(loan_data_scaled)[0]
         
         # Decode prediction
         prediction_label = self.label_encoders['loan_status'].inverse_transform([prediction])[0]
@@ -129,7 +136,8 @@ class LoanApprovalModel:
             
         model_data = {
             'model': self.model,
-            'label_encoders': self.label_encoders
+            'label_encoders': self.label_encoders,
+            'scaler': self.scaler
         }
         joblib.dump(model_data, model_path)
         print(f"Model saved to {model_path}")
@@ -140,6 +148,7 @@ class LoanApprovalModel:
             model_data = joblib.load(model_path)
             self.model = model_data['model']
             self.label_encoders = model_data['label_encoders']
+            self.scaler = model_data['scaler']
             self.is_trained = True
             print(f"Model loaded from {model_path}")
         else:
