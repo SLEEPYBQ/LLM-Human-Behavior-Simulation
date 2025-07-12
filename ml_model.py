@@ -158,8 +158,14 @@ def main():
     # Initialize model
     model = LoanApprovalModel()
     
+    # Use relative paths
+    import os
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, 'data', 'loan_approval_dataset 2.csv')
+    model_path = os.path.join(base_dir, 'loan_model.pkl')
+    test_data_path = os.path.join(base_dir, 'test_data.csv')
+    
     # Load and preprocess data
-    csv_path = '/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/data/loan_approval_dataset 2.csv'
     df = model.load_and_preprocess_data(csv_path)
     
     # Split data
@@ -175,7 +181,7 @@ def main():
     accuracy, predictions = model.evaluate(X_test, y_test)
     
     # Save model
-    model.save_model('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/loan_model.pkl')
+    model.save_model(model_path)
     
     # Save test data for later use with LLM agents (exclude target variable for clean prediction)
     test_data_for_llm = X_test.copy()
@@ -191,7 +197,7 @@ def main():
     y_test_logical = 1 - y_test  # Flip the encoding
     test_data_for_llm['true_loan_status'] = y_test_logical
     
-    test_data_for_llm.to_csv('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/test_data.csv', index=False)
+    test_data_for_llm.to_csv(test_data_path, index=False)
     
     print(f"\nTest data saved with {len(test_data_for_llm)} samples for LLM agent evaluation")
     print(f"Test data columns: {list(test_data_for_llm.columns)}")

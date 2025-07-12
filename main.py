@@ -12,6 +12,7 @@ from tqdm import tqdm
 from ml_model import LoanApprovalModel
 from persona_config import *
 from agents.persona_agent import PersonaAgent
+from path_utils import LOAN_MODEL_PATH, PERSONAS_CONFIG_PATH, EXPERIMENT_DATA_PATH, get_results_path
 
 class HumanBehaviorSimulation:
     """Main simulation class for running LLM agents with different personas"""
@@ -295,10 +296,10 @@ def main():
         # Initialize simulation
         sim = HumanBehaviorSimulation(openai_api_key=args.api_key, api_base=args.api_base, model=args.model)
         
-        # Load components
-        sim.load_ml_model('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/loan_model.pkl')
-        sim.load_personas('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/config/personas.json')
-        test_data = sim.load_test_data('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/experiment_cases_balanced.csv')
+        # Load components using path utilities
+        sim.load_ml_model(LOAN_MODEL_PATH)
+        sim.load_personas(PERSONAS_CONFIG_PATH)
+        test_data = sim.load_test_data(EXPERIMENT_DATA_PATH)
         
         # Run simulation
         results = sim.run_simulation(
@@ -310,16 +311,13 @@ def main():
         
         # Save and analyze results
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        results_file = f'/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/results/simulation_results_{timestamp}.csv'
-        
-        # Create results directory
-        os.makedirs('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/results', exist_ok=True)
+        results_file = get_results_path(f'simulation_results_{timestamp}.csv')
         
         sim.save_results(results, results_file)
         analysis = sim.analyze_results(results)
         
         # Save analysis
-        analysis_file = f'/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/results/analysis_{timestamp}.json'
+        analysis_file = get_results_path(f'analysis_{timestamp}.json')
         with open(analysis_file, 'w') as f:
             json.dump(analysis, f, indent=2)
         print(f"Analysis saved to {analysis_file}")

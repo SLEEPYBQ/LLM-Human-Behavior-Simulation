@@ -274,7 +274,14 @@ def save_persona_configs(personas: List[PersonaConfig], filepath: str):
 if __name__ == "__main__":
     # Create and save persona configurations
     personas = create_persona_configs()
-    save_persona_configs(personas, '/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/config/personas.json')
+    
+    # Use relative path
+    import os
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    config_dir = os.path.join(base_dir, 'config')
+    os.makedirs(config_dir, exist_ok=True)
+    
+    save_persona_configs(personas, os.path.join(config_dir, 'personas.json'))
     
     print(f"Created {len(personas)} different persona combinations:")
     for i, persona in enumerate(personas[:5]):  # Show first 5
