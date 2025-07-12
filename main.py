@@ -16,13 +16,16 @@ from agents.persona_agent import PersonaAgent
 class HumanBehaviorSimulation:
     """Main simulation class for running LLM agents with different personas"""
     
-    def __init__(self, openai_api_key: str = None):
+    def __init__(self, openai_api_key: str = None, api_base: str = None):
         self.openai_api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
         if not self.openai_api_key:
             raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable or pass it directly.")
         
+        # Use provided api_base, environment variable, or default
+        self.api_base = api_base or os.getenv('OPENAI_API_BASE', 'https://api.openai-proxy.org/v1')
+        
         self.llm = ChatOpenAI(
-            base_url='https://api.openai-proxy.org/v1',
+            base_url=self.api_base,
             api_key=self.openai_api_key,
             model="gpt-3.5-turbo",
             temperature=0.7
@@ -277,12 +280,13 @@ def main():
     parser.add_argument('--personas', type=int, default=3, help='Number of personas to test')
     parser.add_argument('--verbose', action='store_true', help='Verbose output')
     parser.add_argument('--api-key', type=str, help='OpenAI API key (or set OPENAI_API_KEY env var)')
+    parser.add_argument('--api-base', type=str, help='OpenAI API base URL (or set OPENAI_API_BASE env var)')
     
     args = parser.parse_args()
     
     try:
         # Initialize simulation
-        sim = HumanBehaviorSimulation(openai_api_key=args.api_key)
+        sim = HumanBehaviorSimulation(openai_api_key=args.api_key, api_base=args.api_base)
         
         # Load components
         sim.load_ml_model('/Users/zhangbaiqiao/Desktop/Simulate_Human_Behavior/EXP/loan_model.pkl')
